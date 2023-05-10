@@ -7,8 +7,14 @@ const (
 	IDENT = "IDENT" // 变量标识符
 	INT   = "INT"   // 数字
 	// 运算符
-	ASSIGN = "="
-	PLUS   = "+"
+	ASSIGN   = "="
+	PLUS     = "+"
+	MINUS    = "-"
+	BANG     = "!"
+	ASTERISK = "*"
+	SLASK    = "/"
+	LT       = "<"
+	GT       = ">"
 	// 分割符
 	COMMA     = ","
 	SEMICOLON = ";"

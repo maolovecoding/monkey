@@ -42,6 +42,18 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.ASSIGN, l.ch)
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		tok = newToken(token.BANG, l.ch)
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '/':
+		tok = newToken(token.SLASK, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case ',':
@@ -110,5 +122,5 @@ func isLetter(ch byte) bool {
 }
 
 func isDigit(ch byte) bool {
-	return ch >= '0' && ch <= '9'
+	return ch >= '0' && ch <= '9' // TODO 如何支持浮点型？ 二进制八进制十六进制
 }
