@@ -22,19 +22,21 @@ func New(input string) *Lexer {
 
 // =================== 实现的方法 ===============
 // 读取下一个字符 readPosition指向下一个字符的位置了
-func (lexer *Lexer) readChar() {
-	if lexer.readPosition >= len(lexer.input) {
-		lexer.ch = 0 // 读取到末尾
+func (l *Lexer) readChar() {
+	if l.readPosition >= len(l.input) {
+		l.ch = 0 // 读取到末尾
 	} else {
-		lexer.ch = lexer.input[lexer.readPosition]
+		l.ch = l.input[l.readPosition]
 	}
-	lexer.position = lexer.readPosition
-	lexer.readPosition += 1
+	l.position = l.readPosition
+	l.readPosition += 1
 }
 
 // 获取下一个token
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
+	// 跳过空白字符
+	l.skipWhitespace()
 	switch l.ch {
 	case '=':
 		tok = newToken(token.ASSIGN, l.ch)
@@ -55,13 +57,58 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Type = token.EOF
 		tok.Literal = "" // 文件末尾了
+	default: // 不是可直接识别的字符 检查是否是标识符
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.LookupIdent(tok.Literal) // let标识符拿到其关键字LET类型
+			return tok
+		} else if isDigit(l.ch) {
+			tok.Type = token.INT
+			tok.Literal = l.readNumber()
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch) // 未知的字符
+		}
 	}
 	l.readChar()
 	return tok
+}
+
+// 读取标识符 且后移
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.ch) { // 只要是字符一直读取 start:end
+		l.readChar()
+	}
+	return l.input[position:l.position] // position所在的字符不是letter了
+}
+
+// 跳过空白字符 也可以说"消费 吃掉"
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
+}
+
+// 读取一个数字
+func (l *Lexer) readNumber() string {
+	position := l.position
+	for isDigit(l.ch) { // 只要是字符一直读取 start:end
+		l.readChar()
+	}
+	return l.input[position:l.position] // position所在的字符不是letter了
 }
 
 // ============= 函数 ================
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+func isLetter(ch byte) bool {
+	return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '_'
+}
+
+func isDigit(ch byte) bool {
+	return ch >= '0' && ch <= '9'
 }
