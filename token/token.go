@@ -17,6 +17,9 @@ const (
 	RPAREN = ")"
 	LBRACE = "{"
 	RBRACE = "}"
+	// 关键字
+	LET      = "LET"
+	FUNCTION = "FUNCTION"
 )
 
 type TokenType string
@@ -24,4 +27,18 @@ type TokenType string
 type Token struct {
 	Type    TokenType // 类型
 	Literal string    // 字面量值
+}
+
+// 定义的关键字获取对应的类型
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
+}
+
+// 检查关键字 如果标识符ident是关键字 那就返回对应的常量 否则返回标识符IDENT
+func LookupIdent(ident string) TokenType {
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+	return IDENT
 }
