@@ -5,36 +5,24 @@ import (
 	"testing"
 )
 
-// 支持 if else true false return 关键字测试
-func TestNextTokenFour(t *testing.T) {
+// 支持 == !=
+func TestNextToken(t *testing.T) {
 	input := `
-	if (5 < 10) {
-		return true;
-	} else {
-		return false;
-	}
+	10 == 10;
+	10 != 9;
 	`
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-		{token.IF, "if"},
-		{token.LPAREN, "("},
-		{token.INT, "5"},
-		{token.LT, "<"},
 		{token.INT, "10"},
-		{token.RPAREN, ")"},
-		{token.LBRACE, "{"},
-		{token.RETURN, "return"},
-		{token.TRUE, "true"},
+		{token.EQ, "=="},
+		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
-		{token.RBRACE, "}"},
-		{token.ELSE, "else"},
-		{token.LBRACE, "{"},
-		{token.RETURN, "return"},
-		{token.FALSE, "false"},
+		{token.INT, "10"},
+		{token.NOT_EQ, "!="},
+		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
-		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}
 	l := New(input)
