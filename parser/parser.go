@@ -45,8 +45,10 @@ func New(l *lexer.Lexer) *Parser {
 	}
 	// 关联解析函数
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
-	p.registerPrefix(token.IDENT, p.parseIndentifier)
-	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.IDENT, p.parseIndentifier)      // 标识符
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)     // 数字
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)  // / !
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression) // -
 	// 读取两个词法单元 设置 curToken peekToken
 	p.nextToken()
 	p.nextToken()
@@ -94,10 +96,12 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
-// parseExpression 解析表达式 参数是优先级
+// parseExpression 解析表达式 参数是优先级 是递归的入口 比如前缀表达式处理了 -这种前缀 右操作符还需要处理 又来到这里
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
+		// 没有对应的前缀表达式解析函数
+		p.noPrefixParseFnError(p.curToken.Type) // 收集错误
 		return nil
 	}
 	leftExp := prefix()
@@ -193,4 +197,21 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 	lit.Value = value
 	return lit
+}
+
+// 没有前缀表达式对应的解析函数 错误收集
+func (p *Parser) noPrefixParseFnError(t token.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found.", t)
+	p.errors = append(p.errors, msg)
+}
+
+// - ! 对应的前缀表达式解析函数
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+	p.nextToken() // 向下移动 指向前缀表达式的右操作数
+	expression.Right = p.parseExpression(PREFIX)
+	return expression
 }
