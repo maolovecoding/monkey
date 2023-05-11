@@ -48,7 +48,7 @@ func TestNextTokenThird(t *testing.T) {
 		{token.BANG, "!"},
 		{token.MINUS, "-"},
 		{token.ASTERISK, "*"},
-		{token.SLASK, "/"},
+		{token.SLASH, "/"},
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
 		{token.INT, "5"},
