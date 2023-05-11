@@ -7,12 +7,20 @@ import (
 	"monkey/token"
 )
 
-// 语法解析器对象
+type (
+	prefixParseFn func() ast.Expression               // 前缀解析函数
+	infixParseFn  func(ast.Expression) ast.Expression // 中缀解析函数 参数是中缀表达式左侧的内容
+	// TODO 支持后缀表达式？
+)
+
+// Parser 语法解析器对象
 type Parser struct {
-	l         *lexer.Lexer // 词法解析对象
-	curToken  token.Token  // 当前的token 词法单元
-	peekToken token.Token  // 偷看的下一个token 如果上一个token的信息不够做决策，需要根据该字段来做决策
-	errors    []string     // 错误
+	l              *lexer.Lexer                      // 词法解析对象
+	curToken       token.Token                       // 当前的token 词法单元
+	peekToken      token.Token                       // 偷看的下一个token 如果上一个token的信息不够做决策，需要根据该字段来做决策
+	errors         []string                          // 错误
+	prefixParseFns map[token.TokenType]prefixParseFn // 词法单元类型关联对应的解析函数
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -116,4 +124,11 @@ func (p *Parser) Errors() []string {
 func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead.", t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
