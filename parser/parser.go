@@ -5,6 +5,7 @@ import (
 	"monkey/ast"
 	"monkey/lexer"
 	"monkey/token"
+	"strconv"
 )
 
 // 解析函数类型
@@ -45,6 +46,7 @@ func New(l *lexer.Lexer) *Parser {
 	// 关联解析函数
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIndentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	// 读取两个词法单元 设置 curToken peekToken
 	p.nextToken()
 	p.nextToken()
@@ -177,4 +179,18 @@ func (p *Parser) parseIndentifier() ast.Expression {
 		Token: p.curToken,
 		Value: p.curToken.Literal,
 	}
+}
+
+// 解析为数字字面量
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+	// 字面量是字符串形式的 "10" => 转换为 10
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	lit.Value = value
+	return lit
 }

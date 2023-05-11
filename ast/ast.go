@@ -113,3 +113,17 @@ func (es *ExpressionStatement) String() string {
 	}
 	return ""
 }
+
+// 数字字面量
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64 // 记录数字字面量了 token.INT 关联解析函数 parseIntegerLiteral
+}
+
+func (il *IntegerLiteral) expressionNode() {}
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
+}
