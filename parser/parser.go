@@ -7,10 +7,23 @@ import (
 	"monkey/token"
 )
 
+// 解析函数类型
 type (
 	prefixParseFn func() ast.Expression               // 前缀解析函数
 	infixParseFn  func(ast.Expression) ast.Expression // 中缀解析函数 参数是中缀表达式左侧的内容
 	// TODO 支持后缀表达式？
+)
+
+// 表达式优先级 从上到下依次递增
+const (
+	_ int = iota // 空白标识符
+	LOWEST
+	EQUALS      // ==
+	LESSGREATER // > or <
+	SUM         // +
+	PRODUCT     // *
+	PREFIX      // -X or !X
+	CALL        // add()
 )
 
 // Parser 语法解析器对象
@@ -23,11 +36,15 @@ type Parser struct {
 	infixParseFns  map[token.TokenType]infixParseFn
 }
 
+// New 创建一个parser
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
 		errors: []string{},
 	}
+	// 关联解析函数
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIndentifier)
 	// 读取两个词法单元 设置 curToken peekToken
 	p.nextToken()
 	p.nextToken()
@@ -60,9 +77,29 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseLetStatement() // 处理let语句
 	case token.RETURN:
 		return p.parseReturnStatement() // 处理return
-	default:
+	default: // 不是语句 那就开始解析表达式了
+		return p.parseExpressionStatement()
+	}
+}
+
+// parseExpressionStatement 解析表达式语句
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.curToken}
+	stmt.Expression = p.parseExpression(LOWEST)
+	if p.peekTokenIs(token.SEMICOLON) { // 是分号 跳过 不是分号也无所谓
+		p.nextToken()
+	}
+	return stmt
+}
+
+// parseExpression 解析表达式 参数是优先级
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.curToken.Type]
+	if prefix == nil {
 		return nil
 	}
+	leftExp := prefix()
+	return leftExp
 }
 
 // 解析let 语句
@@ -126,9 +163,18 @@ func (p *Parser) peekError(t token.TokenType) {
 	p.errors = append(p.errors, msg)
 }
 
+// registerPrefix 工具方法 注册解析函数
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
+}
+
+// parseIndentifier 标识符解析函数
+func (p *Parser) parseIndentifier() ast.Expression {
+	return &ast.Identifier{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+	}
 }
