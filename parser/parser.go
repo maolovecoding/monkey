@@ -57,12 +57,13 @@ func New(l *lexer.Lexer) *Parser {
 	}
 	// 关联解析函数
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
-	p.registerPrefix(token.IDENT, p.parseIndentifier)      // 标识符
-	p.registerPrefix(token.INT, p.parseIntegerLiteral)     // 数字
-	p.registerPrefix(token.BANG, p.parsePrefixExpression)  // / !
-	p.registerPrefix(token.MINUS, p.parsePrefixExpression) // -
-	p.registerPrefix(token.TRUE, p.parseBoolean)           // true
-	p.registerPrefix(token.FALSE, p.parseBoolean)          // false
+	p.registerPrefix(token.IDENT, p.parseIndentifier)        // 标识符
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)       // 数字
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)    // / !
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)   // -
+	p.registerPrefix(token.TRUE, p.parseBoolean)             // true
+	p.registerPrefix(token.FALSE, p.parseBoolean)            // false
+	p.registerPrefix(token.LPAREN, p.parseGroupedExpression) // (
 	// 中缀表达式
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -279,9 +280,20 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
+// 解析布尔字面量
 func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{
 		Token: p.curToken,
 		Value: p.curTokenIs(token.TRUE), // true or false
 	}
+}
+
+// 解析 ( 左括号
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+	exp := p.parseExpression(LOWEST)
+	if !p.expectPeek(token.RPAREN) {
+		return nil // 不是右括号 没办法和左括号配对 说明代码有问题
+	}
+	return exp
 }
