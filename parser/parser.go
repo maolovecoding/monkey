@@ -64,6 +64,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.TRUE, p.parseBoolean)             // true
 	p.registerPrefix(token.FALSE, p.parseBoolean)            // false
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression) // (
+	p.registerPrefix(token.IF, p.parseIfExpression)          // if
 	// 中缀表达式
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -296,4 +297,49 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 		return nil // 不是右括号 没办法和左括号配对 说明代码有问题
 	}
 	return exp
+}
+
+// 解析 if
+func (p *Parser) parseIfExpression() ast.Expression {
+	expression := &ast.IfExpression{
+		Token: p.curToken,
+	}
+	if !p.expectPeek(token.LPAREN) {
+		// 不是小括号 语法错误 if ()
+		return nil
+	}
+	p.nextToken()                                    // 跳过 小括号
+	expression.Condition = p.parseExpression(LOWEST) // 条件
+	if !p.expectPeek(token.RPAREN) {
+		return nil // 右侧小括号
+	}
+	if !p.expectPeek(token.LBRACE) { // 左侧大括号
+		return nil
+	}
+	expression.Consequence = p.parseBlockStatement() // 结果 if
+	if p.peekTokenIs(token.ELSE) {
+		// 有没有 else
+		p.nextToken() // 跳过 }
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+		expression.Alternative = p.parseBlockStatement()
+	}
+	return expression
+}
+
+// 解析块级语句
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{}
+	block.Statements = []ast.Statement{}
+	p.nextToken() // 跳过 {
+	// 不是 } 不是结束符
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+		p.nextToken()
+	}
+	return block
 }

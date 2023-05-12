@@ -183,3 +183,47 @@ func (b *Boolean) TokenLiteral() string {
 func (b *Boolean) String() string {
 	return b.Token.Literal
 }
+
+// 块级语句
+type BlockStatement struct {
+	Token      token.Token // "{" 词法单元
+	Statements []Statement
+}
+
+func (bs *BlockStatement) expressionNode() {}
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
+
+// if表达式
+type IfExpression struct {
+	Token       token.Token     // "if" 词法单元
+	Condition   Expression      // 判断条件
+	Consequence *BlockStatement // 结果 根据条件分别指向两种结果
+	Alternative *BlockStatement // 可替代的结果 else语句的结果
+}
+
+func (ie *IfExpression) expressionNode() {}
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+func (ie *IfExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("if")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+	if ie.Alternative != nil {
+		// 有else语句
+		out.WriteString("else ")
+		out.WriteString(ie.Alternative.String())
+	}
+	return out.String()
+}
