@@ -5,6 +5,12 @@ import (
 	"monkey/object"
 )
 
+// true和false创建引用 只有两个实例
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
+
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 	// 语句
@@ -18,14 +24,25 @@ func Eval(node ast.Node) object.Object {
 		return &object.Integer{
 			Value: node.Value,
 		}
+	case *ast.Boolean:
+		return nativeBoolToBooleanObject(node.Value)
 	}
 	return nil
 }
 
+// 解析语句
 func evalStatements(stmts []ast.Statement) object.Object {
 	var result object.Object
 	for _, statement := range stmts {
 		result = Eval(statement)
 	}
 	return result
+}
+
+// 返回缓存的布尔值对象
+func nativeBoolToBooleanObject(input bool) *object.Boolean {
+	if input {
+		return TRUE
+	}
+	return FALSE
 }
