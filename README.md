@@ -366,3 +366,8 @@ callFn(2, 10, fn(x, y){ return x + y; })
 ```js
 <表达式>(<逗号分隔的表达式列表>)
 ```
+
+### repl
+
+当前的repl类似read-lex-print Loop（读取词法分析词打印循环）.
+现在我们可以替换词法分析（Lex）为语法分析（Parse）来构建新的repl。
