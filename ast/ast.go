@@ -28,6 +28,14 @@ type Program struct {
 	Statements []Statement // 切片
 }
 
+func (p *Program) TokenLiteral() string {
+	if len(p.Statements) > 0 {
+		return p.Statements[0].TokenLiteral()
+	} else {
+		return ""
+	}
+}
+
 func (p *Program) String() string {
 	var out bytes.Buffer // 缓冲区
 	for _, s := range p.Statements {
