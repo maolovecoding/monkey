@@ -7,6 +7,7 @@ type ObjectType string // 对象类型
 const (
 	INTEGER_OBJ = "INTEGER"
 	BOOLEAN_OBJ = "BOOLEAN"
+	NULL_OBJ    = "NULL"
 )
 
 // 对象表示
@@ -39,4 +40,17 @@ func (b *Boolean) Inspect() string {
 
 func (b *Boolean) Type() ObjectType {
 	return BOOLEAN_OBJ
+}
+
+// Null
+type Null struct {
+	Value bool
+}
+
+func (n *Null) Inspect() string {
+	return "null"
+}
+
+func (n *Null) Type() ObjectType {
+	return NULL_OBJ
 }
