@@ -43,9 +43,7 @@ func (b *Boolean) Type() ObjectType {
 }
 
 // Null
-type Null struct {
-	Value bool
-}
+type Null struct{}
 
 func (n *Null) Inspect() string {
 	return "null"

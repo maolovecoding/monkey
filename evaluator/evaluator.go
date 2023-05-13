@@ -7,6 +7,7 @@ import (
 
 // true和false创建引用 只有两个实例
 var (
+	NULL  = &object.Null{}
 	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
