@@ -6,6 +6,7 @@ type ObjectType string // 对象类型
 
 const (
 	INTEGER_OBJ = "INTEGER"
+	BOOLEAN_OBJ = "BOOLEAN"
 )
 
 // 对象表示
@@ -25,4 +26,17 @@ func (i *Integer) Inspect() string {
 
 func (i *Integer) Type() ObjectType {
 	return INTEGER_OBJ
+}
+
+// 布尔值
+type Boolean struct {
+	Value bool
+}
+
+func (b *Boolean) Inspect() string {
+	return fmt.Sprintf("%t", b.Value)
+}
+
+func (b *Boolean) Type() ObjectType {
+	return BOOLEAN_OBJ
 }
