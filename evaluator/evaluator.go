@@ -27,6 +27,9 @@ func Eval(node ast.Node) object.Object {
 		}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
+	case *ast.PrefixExpression:
+		right := Eval(node.Right)
+		return evalPrefixExpression(node.Operator, right)
 	}
 	return nil
 }
@@ -46,4 +49,41 @@ func nativeBoolToBooleanObject(input bool) *object.Boolean {
 		return TRUE
 	}
 	return FALSE
+}
+
+// 前缀表达式求值
+func evalPrefixExpression(operator string, right object.Object) object.Object {
+	switch operator {
+	case "!":
+		return evalBangOperatorExpression(right)
+	case "-":
+		return evalMinusPrefixOperatorExpression(right)
+	default: // 不支持该运算符
+		return NULL
+	}
+}
+
+// 返回 表达式的值取反的真值 布尔值取反
+func evalBangOperatorExpression(right object.Object) object.Object {
+	switch right {
+	case TRUE:
+		return FALSE
+	case FALSE:
+		return TRUE
+	case NULL:
+		return TRUE
+	default:
+		return FALSE
+	}
+}
+
+// 返回 表达式的值的相反数
+func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
+	if right.Type() != object.INTEGER_OBJ { // 不是整数
+		return NULL
+	}
+	value := right.(*object.Integer).Value
+	return &object.Integer{
+		Value: -value,
+	}
 }
