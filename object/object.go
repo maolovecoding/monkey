@@ -5,9 +5,10 @@ import "fmt"
 type ObjectType string // 对象类型
 
 const (
-	INTEGER_OBJ = "INTEGER"
-	BOOLEAN_OBJ = "BOOLEAN"
-	NULL_OBJ    = "NULL"
+	INTEGER_OBJ      = "INTEGER"
+	BOOLEAN_OBJ      = "BOOLEAN"
+	NULL_OBJ         = "NULL"
+	RETURN_VALUE_OBJ = "RETURN_VALUE"
 )
 
 // 对象表示
@@ -51,4 +52,17 @@ func (n *Null) Inspect() string {
 
 func (n *Null) Type() ObjectType {
 	return NULL_OBJ
+}
+
+// 返回值对象 记录是否返回了值 return 有值就停止求值
+type ReturnValue struct {
+	Value Object
+}
+
+func (rv *ReturnValue) Inspect() string {
+	return rv.Value.Inspect()
+}
+
+func (n *ReturnValue) Type() ObjectType {
+	return RETURN_VALUE_OBJ
 }

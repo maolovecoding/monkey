@@ -16,7 +16,7 @@ func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 	// 语句
 	case *ast.Program:
-		return evalStatements(node.Statements)
+		return evalProgram(node)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression)
 		// 表达式
@@ -35,18 +35,37 @@ func Eval(node ast.Node) object.Object {
 		right := Eval(node.Right)
 		return evalInfixExpression(node.Operator, left, right)
 	case *ast.BlockStatement:
-		return evalStatements(node.Statements)
+		return evalBlockStatement(node)
 	case *ast.IfExpression:
 		return evalIfExpression(node)
+	case *ast.ReturnStatement:
+		val := Eval(node.ReturnValue)
+		return &object.ReturnValue{Value: val}
 	}
 	return nil
 }
 
-// 解析语句
-func evalStatements(stmts []ast.Statement) object.Object {
+// 解析源代码 根ast
+func evalProgram(program *ast.Program) object.Object {
 	var result object.Object
-	for _, statement := range stmts {
+	for _, statement := range program.Statements {
 		result = Eval(statement)
+		// 是return语句 不在继续执行后续的求值
+		if returnValue, ok := result.(*object.ReturnValue); ok {
+			return returnValue.Value // 返回结果
+		}
+	}
+	return result
+}
+
+// 解析块级语句 if () {xx}
+func evalBlockStatement(block *ast.BlockStatement) object.Object {
+	var result object.Object
+	for _, statement := range block.Statements {
+		result = Eval(statement)
+		if result != nil && result.Type() == object.RETURN_VALUE_OBJ {
+			return result // 不解包return 会在evalProgram想解包拿到return的value 嵌套块的解决
+		}
 	}
 	return result
 }
