@@ -9,6 +9,7 @@ const (
 	BOOLEAN_OBJ      = "BOOLEAN"
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	ERROR_OBJ        = "ERROR"
 )
 
 // 对象表示
@@ -63,6 +64,19 @@ func (rv *ReturnValue) Inspect() string {
 	return rv.Value.Inspect()
 }
 
-func (n *ReturnValue) Type() ObjectType {
+func (rv *ReturnValue) Type() ObjectType {
+	return RETURN_VALUE_OBJ
+}
+
+// 错误对象
+type Error struct {
+	Message string
+}
+
+func (e *Error) Inspect() string {
+	return "ERROR: " + e.Message
+}
+
+func (e *Error) Type() ObjectType {
 	return RETURN_VALUE_OBJ
 }
