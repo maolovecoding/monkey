@@ -265,11 +265,13 @@ func isError(obj object.Object) bool {
 
 // 求标识符的值
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: " + node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin // 找内置的函数
+	}
+	return newError("identifier not found: " + node.Value)
 }
 
 // 解析表达式
@@ -287,13 +289,16 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 
 // 执行函数
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
+	switch fn := fn.(type) {
+	case *object.Function:
+		extendsEnv := extendFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, extendsEnv)
+		return unwrapReturnValue(evaluated)
+	case *object.Builtin: // 内置函数
+		return fn.Fn(args...)
+	default:
 		return newError("not a function: %s", fn.Type())
 	}
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv) // 根据函数环境对函数体求值
-	return unwrapReturnValue(evaluated)
 }
 
 // 创建函数环境 链接外部环境 函数的实参绑定到了函数环境内部 形参名对应实参值
