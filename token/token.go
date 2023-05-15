@@ -4,8 +4,9 @@ const (
 	ILLEGAL = "ILLEGAL" // 未知的类型 非法类型等
 	EOF     = "EOF"     // end of file
 	// 标识符 + 字面量
-	IDENT = "IDENT" // 变量标识符
-	INT   = "INT"   // 数字
+	IDENT  = "IDENT"  // 变量标识符
+	INT    = "INT"    // 数字
+	STRING = "STRING" // 字符串
 	// 运算符
 	ASSIGN   = "="
 	PLUS     = "+"
