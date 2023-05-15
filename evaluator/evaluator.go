@@ -166,6 +166,8 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
 	case operator == "==": // 对于布尔类型的 == != 比较 因为底层的true和false是相同的object表示 这样是很合适比较的
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
@@ -200,6 +202,19 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return nativeBoolToBooleanObject(leftValue != rightValue)
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+// TODO 支持字符串比较 ？ == !=
+// 字符串中缀表达式
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" { // 只支持字符串拼接
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return &object.String{
+		Value: leftVal + rightVal,
 	}
 }
 
