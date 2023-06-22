@@ -25,6 +25,7 @@ const (
 	PRODUCT     // * /
 	PREFIX      // -X or !X
 	CALL        // add()
+	INDEX       // arr[index] 索引运算符 优先级最高
 )
 
 // 优先级表  词法类型关联对应的优先级
@@ -37,7 +38,8 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
-	token.LPAREN:   CALL, // 函数调用表达式 具备最高优先级
+	token.LPAREN:   CALL,  // 函数调用表达式 具备最高优先级
+	token.LBRACKET: INDEX, // [ 索引表达式访问优先级
 }
 
 // Parser 语法解析器对象
@@ -79,7 +81,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
-	p.registerInfix(token.LPAREN, p.parseCallExpression) // "(" 解析函数
+	p.registerInfix(token.LPAREN, p.parseCallExpression)    // "(" 解析函数
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression) // [ 解析函数
 	// 读取两个词法单元 设置 curToken peekToken
 	p.nextToken()
 	p.nextToken()
@@ -459,4 +462,18 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 		return nil // 语法错误
 	}
 	return list
+}
+
+// 解析索引表达式 把 [ 当做中缀运算符 arr就是左操作数 0 就是右操作数 arr[0]
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	exp := &ast.IndexExpression{
+		Token: p.curToken,
+		Left:  left,
+	}
+	p.nextToken()
+	exp.Index = p.parseExpression(LOWEST)
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+	return exp
 }

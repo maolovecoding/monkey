@@ -320,7 +320,29 @@ func (al *ArrayLiteral) String() string {
 		elements = append(elements, el.String())
 	}
 	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ","))
+	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")
+	return out.String()
+}
+
+// 数值索引访问表达式
+type IndexExpression struct {
+	Token token.Token // '[' 词法单元
+	Left  Expression  // 正在访问的对象 可以是任何类型 标识符 数组字面量 函数调用
+	Index Expression  // 任何表达式 但是在语义上 该表达式必须产生一个整数
+}
+
+func (ie *IndexExpression) expressionNode() {}
+func (ie *IndexExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
 	return out.String()
 }
