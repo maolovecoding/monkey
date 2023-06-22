@@ -80,6 +80,16 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return right
 		}
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.IndexExpression: // 索引表达式
+		left := Eval(node.Left, env) // arr[index] arr左操作数 index右操作数
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
 	case *ast.BlockStatement:
 		return evalBlockStatement(node, env)
 	case *ast.IfExpression:
@@ -324,4 +334,25 @@ func unwrapReturnValue(obj object.Object) object.Object {
 		return returnValue.Value
 	}
 	return obj
+}
+
+// 索引表达式求值操作
+func evalIndexExpression(left, index object.Object) object.Object {
+	switch {
+	// 左侧是数组类型 右侧是数字类型
+	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return newError("index operator not supported: %s", left.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)        // 数组
+	idx := index.(*object.Integer).Value        // 下标
+	max := int64(len(arrayObject.Elements) - 1) // 最大下标
+	if idx < 0 || idx > max {
+		return NULL // 越界
+	}
+	return arrayObject.Elements[idx]
 }
