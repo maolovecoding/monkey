@@ -24,10 +24,12 @@ const (
 	COMMA     = ","
 	SEMICOLON = ";"
 	// 左右小括号 大括号
-	LPAREN = "("
-	RPAREN = ")"
-	LBRACE = "{"
-	RBRACE = "}"
+	LPAREN   = "("
+	RPAREN   = ")"
+	LBRACE   = "{"
+	RBRACE   = "}"
+	LBRACKET = "["
+	RBRACKET = "]"
 	// 关键字
 	LET      = "LET"
 	FUNCTION = "FUNCTION"
