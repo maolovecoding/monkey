@@ -68,6 +68,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)          // if
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral) // fn
 	p.registerPrefix(token.STRING, p.parseStringLiteral)     // string
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)    // array [
 	// 中缀表达式
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -400,11 +401,11 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 		Token:    p.curToken,
 		Function: function,
 	}
-	exp.Arguments = p.parseCallArguments()
+	exp.Arguments = p.parseExpressionList(token.RPAREN) // 结束末尾是 )
 	return exp
 }
 
-// 函数调用参数
+// 函数调用参数 函数废弃 使用 parseExpressionList
 func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
 	if p.peekTokenIs(token.RPAREN) { // ")" callFn() 没有参数
@@ -429,4 +430,33 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 		Token: p.curToken,
 		Value: p.curToken.Literal,
 	}
+}
+
+// parseArrayLiteral 解析数组字面量
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	array := &ast.ArrayLiteral{
+		Token: p.curToken,
+	}
+	array.Elements = p.parseExpressionList(token.RBRACKET)
+	return array
+}
+
+// 在 parseCallArguments 的基础上修改的通用版本 解析表达式列表 拿到表达式列表 函数调用参数也在这里了
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+	if p.peekTokenIs(end) { // 到数组末尾
+		p.nextToken()
+		return list
+	}
+	p.nextToken() // 跳过逗号
+	list = append(list, p.parseExpression(LOWEST))
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+	if !p.expectPeek(end) {
+		return nil // 语法错误
+	}
+	return list
 }
