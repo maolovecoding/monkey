@@ -40,6 +40,7 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
+	MACRO    = "MACRO"
 )
 
 type TokenType string
@@ -58,6 +59,7 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"macro":  MACRO,
 }
 
 // 检查关键字 如果标识符ident是关键字 那就返回对应的常量 否则返回标识符IDENT
