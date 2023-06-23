@@ -369,3 +369,29 @@ func (hl *HashLiteral) String() string {
 	out.WriteString("}")
 	return out.String()
 }
+
+// 宏定义函数字面量
+type MacroLiteral struct {
+	Token      token.Token // macro 词法单元
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (ml *MacroLiteral) expressionNode() {}
+func (ml *MacroLiteral) TokenLiteral() string {
+	return ml.Token.Literal
+}
+
+func (ml *MacroLiteral) String() string {
+	var out bytes.Buffer
+	params := []string{}
+	for _, p := range ml.Parameters {
+		params = append(params, p.String())
+	}
+	out.WriteString(ml.TokenLiteral())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")")
+	out.WriteString(ml.Body.String())
+	return out.String()
+}
