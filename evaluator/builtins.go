@@ -1,6 +1,9 @@
 package evaluator
 
-import "monkey/object"
+import (
+	"fmt"
+	"monkey/object"
+)
 
 var builtins = map[string]*object.Builtin{
 	"len": {
@@ -109,6 +112,14 @@ var builtins = map[string]*object.Builtin{
 				}
 			}
 			return &object.Array{} // 空数组没有元素 返回值还是空数组就行
+		},
+	},
+	"puts": { // 打印参数 输出结果是每个参数独占一行
+		Fn: func(args ...object.Object) object.Object {
+			for _, arg := range args {
+				fmt.Println(arg.Inspect())
+			}
+			return NULL // 不产生值 只是消费值
 		},
 	},
 }
