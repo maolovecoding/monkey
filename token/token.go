@@ -30,6 +30,8 @@ const (
 	RBRACE   = "}"
 	LBRACKET = "["
 	RBRACKET = "]"
+	// map 支持 :
+	COLON = ":"
 	// 关键字
 	LET      = "LET"
 	FUNCTION = "FUNCTION"

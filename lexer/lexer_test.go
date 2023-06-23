@@ -14,6 +14,7 @@ func TestNextTokenThird(t *testing.T) {
 	!-*/5;
 	5 < 10 > 5;
 	let result = add(five, ten);
+	{"foo": "bar"};
 	`
 	tests := []struct {
 		expectedType    token.TokenType
@@ -66,6 +67,12 @@ func TestNextTokenThird(t *testing.T) {
 		{token.COMMA, ","},
 		{token.IDENT, "ten"},
 		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+		{token.LBRACE, "{"},
+		{token.STRING, "foo"},
+		{token.COLON, ":"},
+		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
