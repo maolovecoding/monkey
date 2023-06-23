@@ -38,7 +38,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		// TODO 实现宏函数 quote是内置函数 调用时跳过参数求值
 		// TODO 不是最完美方案 但是这样实现也没问题
 		if node.Function.TokenLiteral() == "quote" {
-			return quote(node.Arguments[0]) // 是quote函数调用 那么不能对参数求值
+			return quote(node.Arguments[0], env) // 是quote函数调用 那么不能对参数求值
 		}
 		function := Eval(node.Function, env)
 		if isError(function) {

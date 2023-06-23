@@ -4,6 +4,7 @@ package ast
 type ModifierFunc func(Node) Node
 
 // 遍历的节点 修改节点的函数
+// TODO 虽然修改了节点 但是都是子节点 没有修改父节点 比如父节点的Token字段 会导致String()输出的信息与节点不一致或者是错误！
 func Modify(node Node, modifier ModifierFunc) Node {
 	switch node := node.(type) {
 	// 有子节点可以递归修改
